@@ -20,6 +20,6 @@ func doesExist(path string) (bool, error) {
 	} else if errors.Is(err, os.ErrNotExist) {
 		return false, nil
 	} else {
-		return false, errors.New("Unknown Error")
+		return false, errors.New("unknown error")
 	}
 }
