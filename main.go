@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"fmt"
+	"io"
 	"os"
 )
 
@@ -21,8 +23,28 @@ func main() {
 
 }
 
-func receiveArguments() {
+const (
+	OK    = 0
+	Error = 1
+)
 
+type CLI struct {
+	outStream, errStream io.Writer
+}
+
+func (c *CLI) receiveArguments(args []string) ([]string, error) {
+
+	if len(args) <= 1 {
+		return []string{}, errors.New("need 2 arguments")
+	}
+
+	for _, v := range args {
+		if _, err := os.Stat(v); err != nil {
+			return []string{}, fmt.Errorf("no such file : %v", v)
+		}
+	}
+
+	return args, nil
 }
 
 func getFilePath() {
