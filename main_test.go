@@ -66,3 +66,39 @@ func Test_receiveArguments(t *testing.T) {
 	}
 
 }
+
+func Test_calculateHash(t *testing.T) {
+	testFile := "toBeCalculateHash.txt"
+	tests := []struct {
+		name      string
+		filePath  string
+		expected  string
+		wantError bool
+	}{
+		{"caluculate hash", testFile, "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855", false},
+		{"failed to calculate", "nofile.txt", "", true},
+	}
+	os.Create(testFile)
+	defer os.RemoveAll(testFile)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hash, err := calculateHash(tt.filePath)
+			if tt.wantError {
+				if err == nil {
+					fmt.Errorf("should be err : %v", tt.name)
+				}
+				if hash != "" {
+					fmt.Errorf("should be empty string : %v", tt.name)
+					fmt.Errorf("return : %v", hash)
+				}
+			} else {
+				if hash != tt.expected {
+					fmt.Errorf("test case : %v", tt.name)
+					fmt.Errorf("In %v, hash is wrong. \n expected : %v \n result : %v", tt.filePath, tt.expected, hash)
+				}
+			}
+		})
+	}
+
+}
