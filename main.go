@@ -3,12 +3,18 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 )
 
 func main() {
 	//recieve arguments from stdin
+	cli := &CLI{args: os.Args[1:]} // os.Args[0] はプログラムの実行パスなので除外
+	filePaths, err := cli.receiveArguments()
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+	fmt.Println("Received file paths:", filePaths)
 	//check format of arguments
 	//run logic
 
@@ -29,22 +35,22 @@ const (
 )
 
 type CLI struct {
-	outStream, errStream io.Writer
+	args []string
 }
 
-func (c *CLI) receiveArguments(args []string) ([]string, error) {
+func (c *CLI) receiveArguments() ([]string, error) {
 
-	if len(args) <= 1 {
-		return []string{}, errors.New("need 2 arguments")
+	if len(c.args) < 2 {
+		return nil, errors.New("need at least 2 arguments")
 	}
 
-	for _, v := range args {
+	for _, v := range c.args {
 		if _, err := os.Stat(v); err != nil {
-			return []string{}, fmt.Errorf("no such file : %v", v)
+			return nil, fmt.Errorf("no such file: %v", v)
 		}
 	}
 
-	return args, nil
+	return c.args, nil
 }
 
 func getFilePath() {
