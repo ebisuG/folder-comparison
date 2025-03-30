@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/sha256"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -66,7 +68,20 @@ func searchAndApplyFunction() {
 
 }
 
-func calculateHash() {
+func calculateHash(path string) (string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", fmt.Errorf("no such file to calculate hash : %v", err)
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", fmt.Errorf("failed to calculate hash : %v", err)
+	}
+
+	fmt.Printf("%x", h.Sum(nil))
+	return string(h.Sum(nil)), nil
 
 }
 
