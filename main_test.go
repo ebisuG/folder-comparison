@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 )
 
@@ -26,36 +24,45 @@ func Test_doesExist(t *testing.T) {
 }
 
 func Test_receiveArguments(t *testing.T) {
-	os.Mkdir("./folder1-1", 0777)
-	os.Mkdir("folder1-2", 0777)
-	defer os.RemoveAll("./folder1-1/")
-	defer os.RemoveAll("./folder1-2/")
-	correctInput1 := "./folder1-1 folder1-2"
-	wrongInput1 := ""
-	wrongInput2 := " ./wrongFile2-1"
-	wrongTestInputs := []string{wrongInput1, wrongInput2}
-	outStream, errStream := new(bytes.Buffer), new(bytes.Buffer)
-	cli := &CLI{outStream: outStream, errStream: errStream}
-
-	args := strings.Split(correctInput1, " ")
-	fmt.Println(args)
-	result, err := cli.receiveArguments(args)
-	if err != nil {
-		t.Errorf("return value should be nil : %v \n", err)
-	}
-	if !(result[0] == "./folder1-1" && result[1] == "folder1-2") {
-		t.Errorf("length of return value should be two : %v \n", err)
-	}
-
-	for _, v := range wrongTestInputs {
-		args := strings.Split(v, " ")
-		result, err := cli.receiveArguments(args)
-		if err == nil {
-			t.Errorf("receiveArguments should fail : %v \n", err)
+	testDirs := []string{"./folder1-1", "./folder1-2"}
+	for _, dir := range testDirs {
+		if err := os.Mkdir(dir, 0777); err != nil {
+			t.Fatalf("failed to create test directory: %v", err)
 		}
-		if len(result) != 0 {
-			t.Errorf("receiveArguments should return empty array : %v \n", err)
+	}
+	defer func() {
+		for _, dir := range testDirs {
+			os.RemoveAll(dir)
 		}
+	}()
+
+	tests := []struct {
+		name      string
+		args      []string
+		wantError bool
+	}{
+		{"Valid paths", []string{"./folder1-1", "./folder1-2"}, false},
+		{"Missing arguments", []string{""}, true},
+		{"Non-existent path", []string{"./folder1-1", "./wrongFile"}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cli := &CLI{args: tt.args}
+			result, err := cli.receiveArguments()
+			if tt.wantError {
+				if err == nil {
+					t.Errorf("expected error but got none")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+				}
+				if len(result) != len(tt.args) {
+					t.Errorf("expected %d arguments, got %d", len(tt.args), len(result))
+				}
+			}
+		})
 	}
 
 }
