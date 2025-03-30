@@ -57,6 +57,11 @@ func getFilePath() {
 
 }
 
+type FileHash struct {
+	hash       string
+	rootFolder string
+}
+
 func searchAndApplyFunction() {
 
 }
