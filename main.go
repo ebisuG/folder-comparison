@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -57,6 +58,35 @@ func (c *CLI) receiveArguments() ([]string, error) {
 
 func getFilePath() {
 
+}
+
+type FileHash struct {
+	hash       []byte
+	rootFolder string
+}
+
+func (fh *FileHash) CalcHashRecursively() ([]byte, error) {
+	err := filepath.WalkDir(
+		fh.rootFolder,
+		func(path string, d os.DirEntry, err error) error {
+			// var hashSum []byte
+			if d.IsDir() {
+				return nil
+			} else {
+				hash, err := calculateHash(path)
+				if err != nil {
+					fmt.Errorf("failed to calculate hash : %v", err)
+					return err
+				}
+				fh.hash = append(fh.hash, hash...)
+				return nil
+			}
+		})
+	if err != nil {
+		fmt.Errorf("failed to WalkDir : %v", err)
+		return []byte{0}, nil
+	}
+	return fh.hash, nil
 }
 
 func calculateHash(path string) ([]byte, error) {
