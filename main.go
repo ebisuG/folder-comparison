@@ -59,29 +59,20 @@ func getFilePath() {
 
 }
 
-type FileHash struct {
-	hash       string
-	rootFolder string
-}
-
-func searchAndApplyFunction() {
-
-}
-
-func calculateHash(path string) (string, error) {
+func calculateHash(path string) ([]byte, error) {
 	f, err := os.Open(path)
-	if err != nil {
-		return "", fmt.Errorf("no such file to calculate hash : %v", err)
-	}
 	defer f.Close()
+	if err != nil {
+		return []byte{0}, fmt.Errorf("no such file to calculate hash : %v", err)
+	}
 
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
-		return "", fmt.Errorf("failed to calculate hash : %v", err)
+		return []byte{0}, fmt.Errorf("failed to calculate hash : %v", err)
 	}
 
 	fmt.Printf("%x", h.Sum(nil))
-	return string(h.Sum(nil)), nil
+	return h.Sum(nil), nil
 
 }
 
