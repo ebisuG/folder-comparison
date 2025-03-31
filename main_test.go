@@ -103,3 +103,28 @@ func Test_calculateHash(t *testing.T) {
 	}
 
 }
+func Test_CalcHashRecursively(t *testing.T) {
+	testFolder1 := "testFolder1"
+	testFiles1 := []string{"test.txt", "test2.txt", "test3.txt"}
+	testFolder2 := "testFolder2"
+	testFiles2 := []string{"test.txt", "test2.txt", "test3.txt"}
+	os.Mkdir(testFolder1, 0777)
+	os.Chdir(testFolder1)
+	for _, v := range testFiles1 {
+		os.Create(v)
+	}
+	os.Mkdir(testFolder2, 0777)
+	os.Chdir(testFolder2)
+	for _, v := range testFiles2 {
+		os.Create(v)
+	}
+	os.Chdir("../")
+	defer os.RemoveAll(testFolder1)
+
+	fileHash := FileHash{hash: []byte{0}, rootFolder: "."}
+	result, err := fileHash.CalcHashRecursively()
+	if err != nil {
+		fmt.Errorf("error : %v\n", err)
+	}
+	fmt.Printf("result : %v \n", string(result))
+}
