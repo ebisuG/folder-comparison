@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -72,11 +73,11 @@ func Test_calculateHash(t *testing.T) {
 	tests := []struct {
 		name      string
 		filePath  string
-		expected  string
+		expected  []byte
 		wantError bool
 	}{
-		{"caluculate hash", testFile, "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855", false},
-		{"failed to calculate", "nofile.txt", "", true},
+		{"caluculate hash", testFile, []byte{45, 33, 42, 30, 43, 34, 34, 32, 39, 38, 46, 43, 31, 43, 31, 34, 39, 41, 46, 42, 46, 34, 43, 38, 39, 39, 36, 46, 42, 39, 32, 34, 32, 37, 41, 45, 34, 31, 45, 34, 36, 34, 39, 42, 39, 33, 34, 43, 41, 34, 39, 35, 39, 39, 31, 42, 37, 38, 35, 32, 42, 38, 35, 35}, false},
+		{"failed to calculate", "nofile.txt", []byte{0}, true},
 	}
 	os.Create(testFile)
 	defer os.RemoveAll(testFile)
@@ -88,12 +89,12 @@ func Test_calculateHash(t *testing.T) {
 				if err == nil {
 					fmt.Errorf("should be err : %v", tt.name)
 				}
-				if hash != "" {
+				if hash != nil {
 					fmt.Errorf("should be empty string : %v", tt.name)
 					fmt.Errorf("return : %v", hash)
 				}
 			} else {
-				if hash != tt.expected {
+				if reflect.DeepEqual(hash, tt.expected) {
 					fmt.Errorf("test case : %v", tt.name)
 					fmt.Errorf("In %v, hash is wrong. \n expected : %v \n result : %v", tt.filePath, tt.expected, hash)
 				}
