@@ -7,23 +7,6 @@ import (
 	"testing"
 )
 
-func Test_doesExist(t *testing.T) {
-	exists := "test.txt"
-	notExist := "noSuchFile.txt"
-	os.Create("test.txt")
-	expectedTrue, err1 := doesExist(exists)
-	expectedFalse, err2 := doesExist(notExist)
-	if !(expectedTrue && !expectedFalse) {
-		t.Errorf(`doesExist doesn't work well`)
-		t.Errorf(`exists : %v`, err1)
-		t.Errorf(`notExist : %v`, err2)
-	}
-	err := os.Remove(exists)
-	if err != nil {
-		fmt.Printf("remove failed : %v", err)
-	}
-}
-
 func Test_receiveArguments(t *testing.T) {
 	testDirs := []string{"./folder1-1", "./folder1-2"}
 	for _, dir := range testDirs {

@@ -101,14 +101,3 @@ func calculateHash(path string) ([]byte, error) {
 	return h.Sum(nil), nil
 
 }
-
-func doesExist(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	} else if errors.Is(err, os.ErrNotExist) {
-		return false, nil
-	} else {
-		return false, errors.New("unknown error")
-	}
-}
