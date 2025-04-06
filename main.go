@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -65,7 +66,7 @@ type FileHash struct {
 	rootFolder string
 }
 
-func (fh *FileHash) CalcHashRecursively() ([]byte, error) {
+func (fh *FileHash) CalcHashRecursively() (string, error) {
 	err := filepath.WalkDir(
 		fh.rootFolder,
 		func(path string, d os.DirEntry, err error) error {
@@ -73,20 +74,21 @@ func (fh *FileHash) CalcHashRecursively() ([]byte, error) {
 			if d.IsDir() {
 				return nil
 			} else {
-				hash, err := calculateHash(path)
-				if err != nil {
-					fmt.Errorf("failed to calculate hash : %v", err)
-					return err
+				hash, err1 := calculateHash(path)
+				if err1 != nil {
+					return fmt.Errorf("failed to calculate hash : %v", err1)
 				}
 				fh.hash = append(fh.hash, hash...)
 				return nil
 			}
 		})
 	if err != nil {
-		fmt.Errorf("failed to WalkDir : %v", err)
-		return []byte{0}, nil
+		return "", err
 	}
-	return fh.hash, nil
+	fileHash := sha256.New()
+	fileHash.Write(fh.hash)
+	fmt.Printf("sum is : %v\n", fileHash.Sum(nil))
+	return hex.EncodeToString(fileHash.Sum(nil)), nil
 }
 
 func calculateHash(path string) ([]byte, error) {
