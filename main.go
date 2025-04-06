@@ -102,7 +102,6 @@ func calculateHash(path string) ([]byte, error) {
 		return []byte{0}, fmt.Errorf("failed to calculate hash : %v", err)
 	}
 
-	fmt.Printf("%x", h.Sum(nil))
 	return h.Sum(nil), nil
 
 }
