@@ -2,10 +2,12 @@ package main
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -60,28 +62,48 @@ func getFilePath() {
 }
 
 type FileHash struct {
-	hash       string
+	hash       []byte
 	rootFolder string
 }
 
-func searchAndApplyFunction() {
-
+func (fh *FileHash) CalcHashRecursively() (string, error) {
+	err := filepath.WalkDir(
+		fh.rootFolder,
+		func(path string, d os.DirEntry, err error) error {
+			// var hashSum []byte
+			if d.IsDir() {
+				return nil
+			} else {
+				hash, err1 := calculateHash(path)
+				if err1 != nil {
+					return fmt.Errorf("failed to calculate hash : %v", err1)
+				}
+				fh.hash = append(fh.hash, hash...)
+				return nil
+			}
+		})
+	if err != nil {
+		return "", err
+	}
+	fileHash := sha256.New()
+	fileHash.Write(fh.hash)
+	return hex.EncodeToString(fileHash.Sum(nil)), nil
 }
 
-func calculateHash(path string) (string, error) {
+func calculateHash(path string) ([]byte, error) {
 	f, err := os.Open(path)
-	if err != nil {
-		return "", fmt.Errorf("no such file to calculate hash : %v", err)
-	}
 	defer f.Close()
+	if err != nil {
+		return []byte{0}, fmt.Errorf("no such file to calculate hash : %v", err)
+	}
 
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
-		return "", fmt.Errorf("failed to calculate hash : %v", err)
+		return []byte{0}, fmt.Errorf("failed to calculate hash : %v", err)
 	}
 
 	fmt.Printf("%x", h.Sum(nil))
-	return string(h.Sum(nil)), nil
+	return h.Sum(nil), nil
 
 }
 
