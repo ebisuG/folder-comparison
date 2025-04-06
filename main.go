@@ -36,24 +36,8 @@ func main() {
 	for _ = range cli.args {
 		<-done
 	}
-	//check format of arguments
-	//run logic
-
-	//there is two arguments for separate file
-	//repeat loop to recursively search files under a folder
-
-	//in a loop, calc hash of a file
-	//and add that value to the accumulated value
-	//at the end, return the sum of hash value
-
-	//finally, compare those values if they are same or not
 
 }
-
-const (
-	OK    = 0
-	Error = 1
-)
 
 type CLI struct {
 	args []string
@@ -74,10 +58,6 @@ func (c *CLI) receiveArguments() ([]string, error) {
 	return c.args, nil
 }
 
-func getFilePath() {
-
-}
-
 type FileHash struct {
 	hash       []byte
 	rootFolder string
@@ -87,7 +67,6 @@ func (fh *FileHash) CalcHashRecursively() (string, error) {
 	err := filepath.WalkDir(
 		fh.rootFolder,
 		func(path string, d os.DirEntry, err error) error {
-			// var hashSum []byte
 			if d.IsDir() {
 				return nil
 			} else {
@@ -120,15 +99,6 @@ func calculateHash(path string) ([]byte, error) {
 	}
 
 	return h.Sum(nil), nil
-
-}
-
-func accumulateValue() {
-
-}
-
-// apply a function for some files in a parallel way
-func parallelize() {
 
 }
 
