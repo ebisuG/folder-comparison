@@ -87,7 +87,6 @@ func (fh *FileHash) CalcHashRecursively() (string, error) {
 	}
 	fileHash := sha256.New()
 	fileHash.Write(fh.hash)
-	fmt.Printf("sum is : %v\n", fileHash.Sum(nil))
 	return hex.EncodeToString(fileHash.Sum(nil)), nil
 }
 
