@@ -19,24 +19,25 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println("Received file paths:", filePaths)
-	//check format of arguments
-	//run logic
 
-	//there is two arguments for separate file
-	//repeat loop to recursively search files under a folder
+	done := make(chan bool)
+	for _, v := range cli.args {
+		go func() {
+			fh := &FileHash{hash: []byte{}, rootFolder: v}
+			hash, err := fh.CalcHashRecursively()
+			if err != nil {
+				fmt.Errorf("error : %v", err)
+			}
+			fmt.Printf("hash is : %v\n", hash)
+			done <- true
+		}()
+	}
 
-	//in a loop, calc hash of a file
-	//and add that value to the accumulated value
-	//at the end, return the sum of hash value
-
-	//finally, compare those values if they are same or not
+	for _ = range cli.args {
+		<-done
+	}
 
 }
-
-const (
-	OK    = 0
-	Error = 1
-)
 
 type CLI struct {
 	args []string
@@ -57,10 +58,6 @@ func (c *CLI) receiveArguments() ([]string, error) {
 	return c.args, nil
 }
 
-func getFilePath() {
-
-}
-
 type FileHash struct {
 	hash       []byte
 	rootFolder string
@@ -70,7 +67,6 @@ func (fh *FileHash) CalcHashRecursively() (string, error) {
 	err := filepath.WalkDir(
 		fh.rootFolder,
 		func(path string, d os.DirEntry, err error) error {
-			// var hashSum []byte
 			if d.IsDir() {
 				return nil
 			} else {
@@ -102,27 +98,6 @@ func calculateHash(path string) ([]byte, error) {
 		return []byte{0}, fmt.Errorf("failed to calculate hash : %v", err)
 	}
 
-	fmt.Printf("%x", h.Sum(nil))
 	return h.Sum(nil), nil
 
-}
-
-func accumulateValue() {
-
-}
-
-// apply a function for some files in a parallel way
-func parallelize() {
-
-}
-
-func doesExist(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	} else if errors.Is(err, os.ErrNotExist) {
-		return false, nil
-	} else {
-		return false, errors.New("unknown error")
-	}
 }
