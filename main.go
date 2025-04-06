@@ -19,6 +19,23 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println("Received file paths:", filePaths)
+
+	done := make(chan bool)
+	for _, v := range cli.args {
+		go func() {
+			fh := &FileHash{hash: []byte{}, rootFolder: v}
+			hash, err := fh.CalcHashRecursively()
+			if err != nil {
+				fmt.Errorf("error : %v", err)
+			}
+			fmt.Printf("hash is : %v\n", hash)
+			done <- true
+		}()
+	}
+
+	for _ = range cli.args {
+		<-done
+	}
 	//check format of arguments
 	//run logic
 
