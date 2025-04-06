@@ -108,23 +108,38 @@ func Test_CalcHashRecursively(t *testing.T) {
 	testFiles1 := []string{"test.txt", "test2.txt", "test3.txt"}
 	testFolder2 := "testFolder2"
 	testFiles2 := []string{"test.txt", "test2.txt", "test3.txt"}
-	os.Mkdir(testFolder1, 0777)
-	os.Chdir(testFolder1)
-	for _, v := range testFiles1 {
-		os.Create(v)
+
+	err := os.Mkdir(testFolder1, 0777)
+	if err != nil {
+		t.Fatalf("failed to create test folder: %v", err)
 	}
-	os.Mkdir(testFolder2, 0777)
-	os.Chdir(testFolder2)
-	for _, v := range testFiles2 {
-		os.Create(v)
-	}
-	os.Chdir("../")
 	defer os.RemoveAll(testFolder1)
 
-	fileHash := FileHash{hash: []byte{0}, rootFolder: "."}
+	err = os.Mkdir(fmt.Sprintf("%s/%s", testFolder1, testFolder2), 0777)
+	if err != nil {
+		t.Fatalf("failed to create subfolder: %v", err)
+	}
+
+	for _, fileName := range testFiles1 {
+		file, err := os.Create(fmt.Sprintf("%s/%s", testFolder1, fileName))
+		if err != nil {
+			t.Fatalf("failed to create test file in subfolder: %v", err)
+		}
+		file.Close()
+	}
+
+	for _, fileName := range testFiles2 {
+		file, err := os.Create(fmt.Sprintf("%s/%s/%s", testFolder1, testFolder2, fileName))
+		if err != nil {
+			t.Fatalf("failed to create test file in subfolder: %v", err)
+		}
+		file.Close()
+	}
+
+	fileHash := &FileHash{hash: []byte{}, rootFolder: "./testFolder1"}
 	result, err := fileHash.CalcHashRecursively()
 	if err != nil {
 		fmt.Errorf("error : %v\n", err)
 	}
-	fmt.Printf("result : %v \n", string(result))
+	fmt.Printf("result : %v \n", result)
 }
