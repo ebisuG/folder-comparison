@@ -19,7 +19,7 @@ func main() {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
-	fmt.Println("Received file paths:", filePaths)
+	fmt.Println("Compare :", filePaths)
 
 	var wg sync.WaitGroup
 	results := make([]string, len(cli.args))
@@ -32,12 +32,10 @@ func main() {
 			if err != nil {
 				fmt.Errorf("error : %v", err)
 			}
-			fmt.Printf("hash is : %v\n", hash)
 			results[i] = hash
 		}(i, v)
 	}
 	wg.Wait()
-	fmt.Println("results :", results)
 	for i := range results {
 		if i != len(results)-1 {
 			if results[i] == results[i+1] {
