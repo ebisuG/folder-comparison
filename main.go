@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 func main() {
@@ -20,22 +21,34 @@ func main() {
 	}
 	fmt.Println("Received file paths:", filePaths)
 
-	done := make(chan bool)
-	for _, v := range cli.args {
-		go func() {
+	var wg sync.WaitGroup
+	results := make([]string, len(cli.args))
+	for i, v := range cli.args {
+		wg.Add(1)
+		go func(i int, v string) {
+			defer wg.Done()
 			fh := &FileHash{hash: []byte{}, rootFolder: v}
 			hash, err := fh.CalcHashRecursively()
 			if err != nil {
 				fmt.Errorf("error : %v", err)
 			}
 			fmt.Printf("hash is : %v\n", hash)
-			done <- true
-		}()
+			results[i] = hash
+		}(i, v)
 	}
-
-	for _ = range cli.args {
-		<-done
+	wg.Wait()
+	fmt.Println("results :", results)
+	for i := range results {
+		if i != len(results)-1 {
+			if results[i] == results[i+1] {
+				continue
+			} else {
+				fmt.Printf("Different files")
+				return
+			}
+		}
 	}
+	fmt.Printf("Same files")
 
 }
 
