@@ -19,10 +19,13 @@ func main() {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
+
 	fmt.Println("Compare :", filePaths)
+	fmt.Println("==========")
 
 	var wg sync.WaitGroup
 	results := make([]string, len(cli.args))
+
 	for i, v := range cli.args {
 		wg.Add(1)
 		go func(i int, v string) {
@@ -30,22 +33,28 @@ func main() {
 			fh := &FileHash{hash: []byte{}, rootFolder: v}
 			hash, err := fh.CalcHashRecursively()
 			if err != nil {
-				fmt.Errorf("error : %v", err)
+				fmt.Println("Error:", err)
+				os.Exit(1)
 			}
 			results[i] = hash
+			fmt.Printf("%v : %v \n", hash, v)
 		}(i, v)
 	}
+
 	wg.Wait()
+
 	for i := range results {
 		if i != len(results)-1 {
 			if results[i] == results[i+1] {
 				continue
 			} else {
-				fmt.Printf("Different files")
+				fmt.Println("==========")
+				fmt.Println("Different files")
 				return
 			}
 		}
 	}
+	fmt.Println("==========")
 	fmt.Printf("Same files")
 
 }
